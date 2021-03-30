@@ -109,6 +109,7 @@ const protected = async(req, res) => {
 const confirm = ('/confirm', async (req, res) => {
     try {
 
+        console.log(req.body);
         //check if the request has the user id and the code: 
         if (!req.body.id || !req.body.code) throw ({ error: 'need more information' });
 
@@ -139,18 +140,24 @@ const confirm = ('/confirm', async (req, res) => {
 const login = ('/login', async (req, res) => {
     try {
 
-        //check if the user logged in : 
-        if (req.session && req.session.token) throw ({ error: 'user already logged in', token: req.session.token })
-
-        //check email and password: 
-        if (!req.body.email || !req.body.password) throw ({ error: 'need more info' });
-
         //try to find the user in the database
         const user = await mUser.findOne({ email: req.body.email }).populate('userCard');
+        // if user not found
         if (!user) {
             res.json({ error: 'user can\'t be found.' });
             return;
         }
+        //check if the user already logged in : 
+        if (req.session && req.session.token) {
+            res.json({
+                token: req.session.token,
+                alreadyLoggedIn: true,
+                userCard: user.userCard
+            })
+        }
+        //check email and password: 
+        if (!req.body.email || !req.body.password) throw ({ error: 'need more info' });
+        // hashed the password
         const hashedPassword = user.password;
         passed = await bcrypt.compare(req.body.password, hashedPassword);
         if (!passed) {
