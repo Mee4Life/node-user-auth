@@ -53,8 +53,13 @@ app.use((req, res, next) => {
 })
 
 
-//use body-parser:
-app.use(bodyParser.json());
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
+
+
 //set view engine:
 app.set('view engine', 'ejs');
 //set public folder:
